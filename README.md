@@ -2,7 +2,7 @@
 
 An experimental, small [WLED](https://github.com/wled/WLED) usermod to enable the external 5V output on the **M5StickC Plus 1.1** by initialising its AXP192 power-management IC. Standard generic ESP32 WLED builds do not necessarily turn on this output.
 
-**Status: one-device proof of concept.** The code was compiled and tested with WLED **0.16.0.1** on an **M5StickC Plus 1.1**, with a short, 20-pixel, 5V three-wire addressable LED strip. The LEDs illuminated after flashing the custom firmware. This is **not** a verified power-capacity rating or long-term reliability test. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported** by this code.
+**Status: one-device proof of concept.** The code was compiled and tested with WLED **0.16.0.1** on an **M5StickC Plus 1.1**, with a short, 20-pixel, 5V three-wire addressable LED strip. The LEDs illuminated after flashing the custom firmware, and **illuminated again after USB power was disconnected for 10 seconds and reconnected**, confirming one successful cold-start test. This is **not** a verified power-capacity rating or long-term reliability test. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported** by this code.
 
 ## What it does
 
@@ -55,7 +55,22 @@ For the 20-LED proof of concept, WLED **Config → LED Preferences** used:
 
 Those settings are **test precautions, not a certification of safe output current**. Start with a dim colour and monitor for resets, overheating or other unexpected behaviour.
 
-For reusable/out-of-tree installs, see [WLED custom features](https://kno.wled.ge/advanced/custom-features/) and the [official usermod template](https://github.com/wled/wled-usermod-example). That workflow uses a `symlink://` entry in `custom_usermods` referencing your local clone.
+### Installing as an external usermod
+
+For a reusable build without copying the source into WLED, [WLED's current custom-features documentation](https://kno.wled.ge/advanced/custom-features/) supports pointing `custom_usermods` at a Git URL. In the WLED project's `platformio_override.ini`, you can try:
+
+```ini
+[platformio]
+default_envs = m5stickc_plus
+
+[env:m5stickc_plus]
+extends = env:esp32dev
+custom_usermods =
+  ${env:esp32dev.custom_usermods}
+  M5StickC_Plus_Power = https://github.com/martindell/wled-m5stickc-plus-power.git#main
+```
+
+This **external Git URL method has not yet been independently built/tested for this module**. The in-tree installation above is the method used in the successful device test. Alternatively, you can clone this usermod beside WLED and reference its path with `symlink://`, as described in the [official usermod template](https://github.com/wled/wled-usermod-example).
 
 ## Troubleshooting
 
@@ -69,7 +84,8 @@ For reusable/out-of-tree installs, see [WLED custom features](https://kno.wled.g
 | --- | --- |
 | M5StickC Plus 1.1 + WLED 0.16.0.1 | Compiled and boots; LEDs lit |
 | GPIO26, 20-pixel 5V addressable strip | Worked at low brightness |
-| Cold-start reliability, long-term operation | Not yet documented |
+| Cold-start after 10 seconds unpowered | Confirmed: LEDs lit again upon USB reconnection |
+| Repeated cold-start reliability, long-term operation | Not yet tested |
 | Maximum safe LED load from onboard 5V output | Unknown — not tested |
 | Original M5StickC / M5StickC Plus2 | Not tested |
 | Other WLED releases | Not tested |
@@ -78,4 +94,4 @@ Contributions and independent test reports are welcome. Please include the exact
 
 ## Licence
 
-[MIT](LICENSE). This is an independent community experiment, not an official WLED or M5Stack firmware release.
+[MIT](LICENSE) for this standalone usermod source. Firmware binaries compiled together with WLED remain subject to WLED's [EUPL-1.2 licensing requirements](https://kno.wled.ge/advanced/community-usermods/); do not describe a combined WLED firmware binary as MIT-only. This is an independent community experiment, not an official WLED or M5Stack firmware release.
