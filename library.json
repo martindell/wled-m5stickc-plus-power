@@ -1,0 +1,8 @@
+{
+  "name": "M5StickC_Plus_Power",
+  "version": "1.0.0",
+  "build": {
+    "libArchive": false
+  },
+  "dependencies": {}
+}
