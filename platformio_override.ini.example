@@ -1,0 +1,10 @@
+; Example for a local in-tree install of this usermod at
+; WLED/usermods/M5StickC_Plus_Power/
+; Put these sections in WLED/platformio_override.ini.
+
+[platformio]
+default_envs = m5stickc_plus
+
+[env:m5stickc_plus]
+extends = env:esp32dev
+custom_usermods = M5StickC_Plus_Power
