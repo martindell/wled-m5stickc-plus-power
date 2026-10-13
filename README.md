@@ -2,7 +2,7 @@
 
 An experimental, small [WLED](https://github.com/wled/WLED) usermod to enable the external 5V output on the **M5StickC Plus 1.1** by initialising its AXP192 power-management IC. Standard generic ESP32 WLED builds do not necessarily turn on this output.
 
-**Status: one-device proof of concept.** The code was compiled and tested with WLED **0.16.0.1** on an **M5StickC Plus 1.1**, with a short, 20-pixel, 5V three-wire addressable LED strip. The LEDs illuminated after flashing the custom firmware, and **illuminated again after USB power was disconnected for 10 seconds and reconnected**, confirming one successful cold-start test. This is **not** a verified power-capacity rating or long-term reliability test. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported** by this code.
+**Status: one-device proof of concept.** The code was compiled and tested with WLED **16.0.1** on an **M5StickC Plus 1.1**, with a short, 20-pixel, 5V three-wire addressable LED strip. The LEDs illuminated after flashing the custom firmware, and **illuminated again after USB power was disconnected for 10 seconds and reconnected**, confirming one successful cold-start test. This is **not** a verified power-capacity rating or long-term reliability test. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported** by this code.
 
 ## What it does
 
@@ -31,7 +31,7 @@ With power **disconnected** before wiring:
 
 **The M5Stick 5V output is not a general-purpose LED-strip power supply.** The maximum safe external load was **not measured or established** in this experiment. Do **not** assume that 20 pixels, or a WLED current-limit setting, makes the power wiring intrinsically safe. WLED's limiter is an estimate, not over-current protection. For sustained use, higher brightness, or more pixels, use a suitably rated external 5V supply, connect grounds, and consider proper 3.3V-to-5V data-level shifting. Incorrect 5V/GND polarity may damage the device or LEDs.
 
-## Build with WLED 0.16.0.1 (tested method)
+## Build with WLED 16.0.1 (tested method)
 
 Install [PlatformIO](https://platformio.org/) (the VS Code extension is convenient). In a terminal:
 
@@ -82,7 +82,7 @@ This **external Git URL method has not yet been independently built/tested for t
 
 | Item | Result |
 | --- | --- |
-| M5StickC Plus 1.1 + WLED 0.16.0.1 | Compiled and boots; LEDs lit |
+| M5StickC Plus 1.1 + WLED 16.0.1 | Compiled and boots; LEDs lit |
 | GPIO26, 20-pixel 5V addressable strip | Worked at low brightness |
 | Cold-start after 10 seconds unpowered | Confirmed: LEDs lit again upon USB reconnection |
 | Repeated cold-start reliability, long-term operation | Not yet tested |
