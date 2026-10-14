@@ -2,16 +2,31 @@
 
 An experimental, small [WLED](https://github.com/wled/WLED) usermod to enable the external 5V output on the **M5StickC Plus 1.1** by initialising its AXP192 power-management IC. Standard generic ESP32 WLED builds do not necessarily turn on this output.
 
-**Status: one-device proof of concept.** The code was compiled and tested with WLED **16.0.1** on an **M5StickC Plus 1.1**, with a short, 20-pixel, 5V three-wire addressable LED strip. The LEDs illuminated after flashing the custom firmware, and **illuminated again after USB power was disconnected for 10 seconds and reconnected**, confirming one successful cold-start test. This is **not** a verified power-capacity rating or long-term reliability test. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported** by this code.
+**Status: revised source awaiting device re-test.** An [earlier `Wire1` version](https://github.com/martindell/wled-m5stickc-plus-power/blob/f0f5ab3bd7cefcf9ef07bc3dc5f52286f0d754df/M5StickC_Plus_Power.cpp) was successfully compiled and tested with WLED **16.0.1** on an **M5StickC Plus 1.1**, with a 20-pixel, 5V addressable LED strip. Its LEDs illuminated again after a 10-second USB power disconnection. The **current source** uses WLED's shared `Wire` bus instead, following maintainer feedback; **that revision has not yet been rebuilt or tested on hardware**. Neither version establishes safe LED power capacity or long-term reliability. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported**.
 
 ## What it does
 
-At WLED startup the usermod talks to the AXP192 at I²C address `0x34` via GPIO21 (SDA) and GPIO22 (SCL), and sets these bits without clearing other register bits:
+At WLED startup the usermod talks to the AXP192 at I²C address `0x34` using **WLED's globally configured shared I²C bus (`Wire`)** on GPIO21 (SDA) and GPIO22 (SCL), and sets these bits without clearing other register bits:
 
 - Register `0x12`, mask `0x40` — enable EXTEN.
 - Register `0x10`, mask `0x04` — enable the external 5V boost output.
 
 This follows the relevant register operations in [M5Stack's M5StickC Plus AXP192 implementation](https://github.com/m5stack/M5StickC-Plus/blob/master/src/AXP192.cpp). It does **not** initialise the screen, buttons, or any other M5-specific functions.
+
+## Required WLED global I²C configuration (shared-Wire revision)
+
+In the WLED web interface, open **Config → Usermods** and set the **global I²C pins** to:
+
+| Global I²C setting | GPIO |
+| --- | --- |
+| **SDA** | **21** |
+| **SCL** | **22** |
+
+Save the settings and restart WLED. **Both must be set correctly:** the usermod deliberately does nothing if WLED's I²C pins are disabled (`-1` / None) or do not match GPIO21/22.
+
+**If upgrading from the original `Wire1` test firmware:** flash the new build **before** enabling global I²C 21/22, otherwise the older firmware may initialise a second I²C controller on the same physical pins. After flashing, configure the pins in WLED and restart.
+
+This revision deliberately does **not** call `Wire.begin()` or reserve these GPIOs itself. WLED initialises the bus and allocates the pins through its `pinManager`. Refer to [WLED's pin-management guidelines](https://github.com/wled/WLED/blob/main/AGENTS.md#pin-ownership-via-pinmanager).
 
 ## Wiring used in the test
 
@@ -42,8 +57,8 @@ git clone --depth 1 --branch v16.0.1 https://github.com/wled/WLED.git WLED
 1. Copy **this repository's** `M5StickC_Plus_Power.cpp` and `library.json` into `WLED/usermods/M5StickC_Plus_Power/`.
 2. Copy the sections from [`platformio_override.ini.example`](platformio_override.ini.example) into `WLED/platformio_override.ini` (create it if necessary).
 3. In the WLED project, run `pio run -e m5stickc_plus`, or use the matching PlatformIO Build task.
-4. Back up WLED settings/presets before updating. Upload the resulting `.pio/build/m5stickc_plus/firmware.bin` via **WLED → Config → Security & Updates → Update WLED** (or flash by USB if required).
-5. After it reboots, verify the WLED web interface still works **before** reconnecting the strip.
+4. Back up WLED settings/presets before updating. If you have a working custom firmware binary, **save a separate copy before rebuilding** because PlatformIO overwrites `firmware.bin`. Upload the resulting `.pio/build/m5stickc_plus/firmware.bin` via **WLED → Config → Security & Updates → Update WLED** (or flash by USB if required).
+5. After it reboots, verify the WLED web interface still works. Then configure **global I²C SDA=21, SCL=22** under **Config → Usermods**, save and restart. Only then reconnect the strip with USB power disconnected while wiring.
 
 For the 20-LED proof of concept, WLED **Config → LED Preferences** used:
 
@@ -74,7 +89,7 @@ This **external Git URL method has not yet been independently built/tested for t
 
 ## Troubleshooting
 
-- **WLED web UI works, no LEDs:** verify that this *custom* firmware was flashed, then check `5V OUT` and common ground (ideally with a multimeter). Also check correct `DIN` end and GPIO26.
+- **WLED web UI works, no LEDs:** with this shared-`Wire` revision, check **Config → Usermods → global I²C SDA=21 / SCL=22** first. Without that configuration, the code intentionally leaves the external 5V output unchanged. Also verify the custom firmware was flashed, then check `5V OUT` and common ground (ideally with a multimeter), correct `DIN` end, and GPIO26.
 - **WLED can see Wi-Fi but cannot join it:** check 2.4GHz access and AP security. In the original test, BT Whole Home mesh required its temporary **2.4 GHz Setup Mode** to complete initial pairing; that is network-specific, not a required WLED modification.
 - **Blank M5Stick screen:** this usermod does not drive the integrated display.
 
@@ -82,9 +97,10 @@ This **external Git URL method has not yet been independently built/tested for t
 
 | Item | Result |
 | --- | --- |
-| M5StickC Plus 1.1 + WLED 16.0.1 | Compiled and boots; LEDs lit |
-| GPIO26, 20-pixel 5V addressable strip | Worked at low brightness |
-| Cold-start after 10 seconds unpowered | Confirmed: LEDs lit again upon USB reconnection |
+| Original `Wire1` code + M5StickC Plus 1.1 + WLED 16.0.1 | Compiled and boots; LEDs lit |
+| Original `Wire1` code + GPIO26, 20-pixel 5V strip | Worked at low brightness |
+| Original `Wire1` code + 10-second cold-start | Confirmed: LEDs lit again on USB reconnection |
+| **Current shared-`Wire` revision** | **Awaiting compilation and hardware re-test** |
 | Repeated cold-start reliability, long-term operation | Not yet tested |
 | Maximum safe LED load from onboard 5V output | Unknown — not tested |
 | Original M5StickC / M5StickC Plus2 | Not tested |
