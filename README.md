@@ -2,7 +2,7 @@
 
 An experimental, small [WLED](https://github.com/wled/WLED) usermod to enable the external 5V output on the **M5StickC Plus 1.1** by initialising its AXP192 power-management IC. Standard generic ESP32 WLED builds do not necessarily turn on this output.
 
-**Status: revised source awaiting device re-test.** An [earlier `Wire1` version](https://github.com/martindell/wled-m5stickc-plus-power/blob/f0f5ab3bd7cefcf9ef07bc3dc5f52286f0d754df/M5StickC_Plus_Power.cpp) was successfully compiled and tested with WLED **16.0.1** on an **M5StickC Plus 1.1**, with a 20-pixel, 5V addressable LED strip. Its LEDs illuminated again after a 10-second USB power disconnection. The **current source** uses WLED's shared `Wire` bus instead, following maintainer feedback; **that revision has not yet been rebuilt or tested on hardware**. Neither version establishes safe LED power capacity or long-term reliability. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported**.
+**Status: successfully compiled and tested on one device.** The **current shared-`Wire` revision** was compiled with WLED **16.0.1**, flashed to an **M5StickC Plus 1.1**, and successfully powered a 20-pixel, 5V addressable LED strip on GPIO26 after configuring global I²C SDA=21/SCL=22. The strip lit after a USB power cycle made to reconnect the wiring. An [earlier `Wire1` version](https://github.com/martindell/wled-m5stickc-plus-power/blob/f0f5ab3bd7cefcf9ef07bc3dc5f52286f0d754df/M5StickC_Plus_Power.cpp) also worked and recovered after a separate 10-second power-off test. Neither version establishes safe LED power capacity, repeated cold-start reliability or long-term reliability. Other M5Stick models, including **M5StickC Plus2**, are **not tested or supported**.
 
 ## What it does
 
@@ -100,7 +100,7 @@ This **external Git URL method has not yet been independently built/tested for t
 | Original `Wire1` code + M5StickC Plus 1.1 + WLED 16.0.1 | Compiled and boots; LEDs lit |
 | Original `Wire1` code + GPIO26, 20-pixel 5V strip | Worked at low brightness |
 | Original `Wire1` code + 10-second cold-start | Confirmed: LEDs lit again on USB reconnection |
-| **Current shared-`Wire` revision** | **Awaiting compilation and hardware re-test** |
+| **Current shared-`Wire` revision** | **Compiled, flashed and LEDs lit on M5StickC Plus 1.1 / WLED 16.0.1 with global I²C SDA=21, SCL=22** |
 | Repeated cold-start reliability, long-term operation | Not yet tested |
 | Maximum safe LED load from onboard 5V output | Unknown — not tested |
 | Original M5StickC / M5StickC Plus2 | Not tested |
