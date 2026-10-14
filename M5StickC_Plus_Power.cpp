@@ -4,42 +4,42 @@
 #include "wled.h"
 #include <Wire.h>
 
-// M5StickC Plus 1.1 - AXP192 external 5V power
+// M5StickC Plus 1.1: enable external 5V via the AXP192 (I2C address 0x34).
+// Uses WLED's shared, globally-configured I2C bus.
+// In WLED Config -> Usermods, set global I2C SDA=21 and SCL=22.
+// WLED itself initialises Wire and reserves the I2C pins via pinManager.
 
 class M5StickCPlusPower : public Usermod {
-
 private:
   bool enableRegisterBit(uint8_t reg, uint8_t mask) {
-    Wire1.beginTransmission(0x34);
-    Wire1.write(reg);
+    Wire.beginTransmission(0x34);
+    Wire.write(reg);
 
-    if (Wire1.endTransmission(false) != 0) return false;
-    if (Wire1.requestFrom((uint8_t)0x34, (uint8_t)1) != 1)
-      return false;
+    if (Wire.endTransmission(false) != 0) return false;
+    if (Wire.requestFrom((uint8_t)0x34, (uint8_t)1) != 1) return false;
 
-    uint8_t value = Wire1.read();
+    const uint8_t value = Wire.read();
 
-    Wire1.beginTransmission(0x34);
-    Wire1.write(reg);
-    Wire1.write(value | mask);
+    Wire.beginTransmission(0x34);
+    Wire.write(reg);
+    Wire.write(value | mask);
 
-    return Wire1.endTransmission() == 0;
+    return Wire.endTransmission() == 0;
   }
 
 public:
   void setup() override {
-    // AXP192 uses GPIO21 (SDA) and GPIO22 (SCL)
-    Wire1.begin(21, 22);
+    // AXP192 is wired to these fixed pins on M5StickC Plus 1.1.
+    // Do not access I2C if WLED's shared bus is disabled or on other pins.
+    if (i2c_sda != 21 || i2c_scl != 22) return;
 
-    // Enable EXTEN power output
-    enableRegisterBit(0x12, 0x40);
-
-    // Enable external 5V boost converter
+    // Enable EXTEN, then external 5V boost (preserving other register bits).
+    if (!enableRegisterBit(0x12, 0x40)) return;
     enableRegisterBit(0x10, 0x04);
   }
 
   void loop() override {
-    // Nothing required
+    // No continuous processing required.
   }
 };
 
