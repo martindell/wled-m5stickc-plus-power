@@ -94,4 +94,6 @@ Contributions and independent test reports are welcome. Please include the exact
 
 ## Licence
 
-[MIT](LICENSE) for this standalone usermod source. Firmware binaries compiled together with WLED remain subject to WLED's [EUPL-1.2 licensing requirements](https://kno.wled.ge/advanced/community-usermods/); do not describe a combined WLED firmware binary as MIT-only. This is an independent community experiment, not an official WLED or M5Stack firmware release.
+This standalone usermod is licensed under the **[European Union Public Licence (EUPL), version 1.2 or later](LICENSE)**, matching the main [WLED project](https://github.com/wled/WLED/blob/main/LICENSE). The full licence text is included in this repository.
+
+If you distribute firmware that combines this usermod with WLED, follow WLED's EUPL obligations for the combined software, including applicable source-code availability requirements. This project is an independent community experiment, not an official WLED or M5Stack firmware release.
