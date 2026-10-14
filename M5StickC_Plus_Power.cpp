@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: EUPL-1.2-or-later
+// Copyright (c) 2026 M5StickC Plus Power contributors
+
 #include "wled.h"
 #include <Wire.h>
 
